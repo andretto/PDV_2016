@@ -64,7 +64,6 @@ public class CadastroNovoActivity extends BaseActivity implements ImageInputHelp
 
         LostApiClient lostApiClient = new LostApiClient.Builder(this).build();
         lostApiClient.connect();
-
         Location location = LocationServices.FusedLocationApi.getLastLocation();
         if (location != null) {
             latitude = location.getLatitude();
@@ -99,6 +98,8 @@ public class CadastroNovoActivity extends BaseActivity implements ImageInputHelp
                 Bitmap imagem = ((BitmapDrawable)imageViewFoto.getDrawable()).getBitmap();
 
                 produto.setFoto(Base64Util.encodeTobase64(imagem));
+                produto.setLatitude(latitude);
+                produto.setLongitude(longitude);
 
                 produto.save();
                 finish();
