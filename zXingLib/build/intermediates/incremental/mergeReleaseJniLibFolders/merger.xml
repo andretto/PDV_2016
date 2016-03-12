@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="/home/elcio/AndroidStudioProjectsTrainning/PDV/zXingLib/src/main/jniLibs"/></dataSet><dataSet config="release"><source path="/home/elcio/AndroidStudioProjectsTrainning/PDV/zXingLib/src/release/jniLibs"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="C:\Users\Marcelo\AndroidStudioProjects\PDV_2016-master\zXingLib\src\main\jniLibs"/></dataSet><dataSet config="release"><source path="C:\Users\Marcelo\AndroidStudioProjects\PDV_2016-master\zXingLib\src\release\jniLibs"/></dataSet></merger>
