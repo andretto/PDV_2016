@@ -7,17 +7,17 @@ import se.emilsjolander.sprinkles.annotations.Key;
 import se.emilsjolander.sprinkles.annotations.Table;
 
 /**
- * Created by Marcelo on 12/03/2016.
+ * Created by elcio on 12/03/16.
  */
 @Table("item")
 public class Item extends Model {
 
     @Key
     @AutoIncrement
-    @Column("Id")
+    @Column("id")
     private long id;
     @Column("id_compra")
-    private long idCompraompra;
+    private long idCompra;
     @Column("id_produto")
     private String idProduto;
     @Column("quantidade")
@@ -31,12 +31,12 @@ public class Item extends Model {
         this.id = id;
     }
 
-    public long getIdCompraompra() {
-        return idCompraompra;
+    public long getIdCompra() {
+        return idCompra;
     }
 
-    public void setIdCompraompra(long idCompraompra) {
-        this.idCompraompra = idCompraompra;
+    public void setIdCompra(long idCompra) {
+        this.idCompra = idCompra;
     }
 
     public String getIdProduto() {
@@ -54,9 +54,4 @@ public class Item extends Model {
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
     }
-
-
-
-
-
 }

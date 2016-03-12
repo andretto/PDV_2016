@@ -1,9 +1,9 @@
 package br.com.trainning.pdv_2016.domain.model;
 
 /**
- * Created by Marcelo on 12/03/2016.
+ * Created by elcio on 12/03/16.
  */
-public class ItemProduto   {
+public class ItemProduto  {
 
     private long idCompra;
     private long idItem;
@@ -68,8 +68,4 @@ public class ItemProduto   {
     public void setPreco(double preco) {
         this.preco = preco;
     }
-
-
-
-
 }

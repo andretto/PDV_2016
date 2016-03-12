@@ -27,7 +27,6 @@ public class Produto extends Model {
     private double preco;
     @Column("foto")
     private String foto;
-
     @Column("latitude")
     private double latitude;
     @Column("longitude")

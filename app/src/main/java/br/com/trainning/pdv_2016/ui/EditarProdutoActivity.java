@@ -75,11 +75,13 @@ public class EditarProdutoActivity extends BaseActivity implements ImageInputHel
 
         LostApiClient lostApiClient = new LostApiClient.Builder(this).build();
         lostApiClient.connect();
+
         Location location = LocationServices.FusedLocationApi.getLastLocation();
         if (location != null) {
             latitude = location.getLatitude();
             longitude = location.getLongitude();
         }
+
 
         LocationRequest request = LocationRequest.create()
                 .setInterval(5000)
@@ -89,16 +91,16 @@ public class EditarProdutoActivity extends BaseActivity implements ImageInputHel
         LocationListener listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                // Do stuff
-                latitude = location.getLatitude();
+               latitude = location.getLatitude();
                 longitude = location.getLongitude();
             }
         };
 
         LocationServices.FusedLocationApi.requestLocationUpdates(request, listener);
 
-        Log.d("LOCATION","Editar Latitude:"+latitude);
-        Log.d("LOCATION","Editar longitude:"+longitude);
+
+        Log.d("LOCATION","EDITAR Latitude:"+latitude);
+        Log.d("LOCATION","EDITAR longitude:"+longitude);
 
         imageInputHelper = new ImageInputHelper(this);
         imageInputHelper.setImageActionListener(this);
@@ -120,6 +122,7 @@ public class EditarProdutoActivity extends BaseActivity implements ImageInputHel
 
                 produto.setLatitude(latitude);
                 produto.setLongitude(longitude);
+
                 produto.save();
 
                 Snackbar.make(view,"Produto alterado com sucesso !",Snackbar.LENGTH_SHORT).show();
