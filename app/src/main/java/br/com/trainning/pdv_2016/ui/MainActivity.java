@@ -27,11 +27,15 @@ import br.com.trainning.pdv_2016.domain.adapter.CustomArrayAdapter;
 import br.com.trainning.pdv_2016.domain.model.Item;
 import br.com.trainning.pdv_2016.domain.model.ItemProduto;
 import br.com.trainning.pdv_2016.domain.model.Produto;
+import br.com.trainning.pdv_2016.domain.network.APIClient;
 import br.com.trainning.pdv_2016.domain.util.Util;
 import butterknife.Bind;
 import jim.h.common.android.lib.zxing.config.ZXingLibConfig;
 import jim.h.common.android.lib.zxing.integrator.IntentIntegrator;
 import jim.h.common.android.lib.zxing.integrator.IntentResult;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import se.emilsjolander.sprinkles.CursorList;
 import se.emilsjolander.sprinkles.Query;
 
@@ -44,6 +48,8 @@ public class MainActivity extends BaseActivity {
     private int quantidadeItens;
     private double valorTotal;
     private CustomArrayAdapter adapter;
+    private Callback<List<Produto>> callbackProdutos;
+
 
     @Bind(R.id.listView)
     SwipeMenuListView listView;
@@ -54,6 +60,8 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        configureProdutoCallback();
 
         zxingLibConfig = new ZXingLibConfig();
         zxingLibConfig.useFrontLight = true;
@@ -173,7 +181,10 @@ public class MainActivity extends BaseActivity {
         }else if(id == R.id.action_edit){
             Intent telaEditarIntent = new Intent(MainActivity.this,EditarProdutoActivity.class);
             startActivity(telaEditarIntent);
+        }else if(id == R.id.action_sincronia){
+            new APIClient().getRestService().getAllProdutos(callbackProdutos);
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -255,4 +266,33 @@ public class MainActivity extends BaseActivity {
         adapter = new CustomArrayAdapter(this, R.layout.list_item, list);
         listView.setAdapter(adapter);
     }
+
+    private void configureProdutoCallback() {
+
+        callbackProdutos = new Callback<List<Produto>>() {
+
+            @Override public void success(List<Produto> resultado, Response response) {
+
+                List<Produto> lp = Query.all(Produto.class).get().asList();
+
+
+
+                for(Produto p:lp){
+                    p.delete();
+                }
+
+                for(Produto produto:resultado){
+                    produto.setId(0L);
+                    produto.save();
+                }
+
+            }
+
+            @Override public void failure(RetrofitError error) {
+
+                Log.e("RETROFIT", "Error:"+error.getMessage());
+            }
+        };
+    }
+
 }
