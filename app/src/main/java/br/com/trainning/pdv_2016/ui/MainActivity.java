@@ -1,12 +1,11 @@
 package br.com.trainning.pdv_2016.ui;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -30,13 +29,14 @@ import br.com.trainning.pdv_2016.domain.model.Produto;
 import br.com.trainning.pdv_2016.domain.network.APIClient;
 import br.com.trainning.pdv_2016.domain.util.Util;
 import butterknife.Bind;
+
+import dmax.dialog.SpotsDialog;
 import jim.h.common.android.lib.zxing.config.ZXingLibConfig;
 import jim.h.common.android.lib.zxing.integrator.IntentIntegrator;
 import jim.h.common.android.lib.zxing.integrator.IntentResult;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import se.emilsjolander.sprinkles.CursorList;
 import se.emilsjolander.sprinkles.Query;
 
 public class MainActivity extends BaseActivity {
@@ -48,7 +48,12 @@ public class MainActivity extends BaseActivity {
     private int quantidadeItens;
     private double valorTotal;
     private CustomArrayAdapter adapter;
+
     private Callback<List<Produto>> callbackProdutos;
+
+    private AlertDialog dialog ;
+
+
 
 
     @Bind(R.id.listView)
@@ -62,6 +67,13 @@ public class MainActivity extends BaseActivity {
         setSupportActionBar(toolbar);
 
         configureProdutoCallback();
+
+        dialog = new SpotsDialog(this,"Baixando lista da Web...");
+
+        List<Item> itens = Query.all(Item.class).get().asList();
+        for (Item item:itens){
+            item.delete();
+        }
 
         zxingLibConfig = new ZXingLibConfig();
         zxingLibConfig.useFrontLight = true;
@@ -182,6 +194,7 @@ public class MainActivity extends BaseActivity {
             Intent telaEditarIntent = new Intent(MainActivity.this,EditarProdutoActivity.class);
             startActivity(telaEditarIntent);
         }else if(id == R.id.action_sincronia){
+            dialog.show();
             new APIClient().getRestService().getAllProdutos(callbackProdutos);
         }
 
@@ -269,6 +282,7 @@ public class MainActivity extends BaseActivity {
 
     private void configureProdutoCallback() {
 
+
         callbackProdutos = new Callback<List<Produto>>() {
 
             @Override public void success(List<Produto> resultado, Response response) {
@@ -285,11 +299,13 @@ public class MainActivity extends BaseActivity {
                     produto.setId(0L);
                     produto.save();
                 }
+                dialog.dismiss();
 
             }
 
-            @Override public void failure(RetrofitError error) {
 
+            @Override public void failure(RetrofitError error) {
+                dialog.dismiss();
                 Log.e("RETROFIT", "Error:"+error.getMessage());
             }
         };
