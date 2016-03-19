@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
@@ -17,12 +18,16 @@ import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.trainning.pdv_2016.R;
 import br.com.trainning.pdv_2016.domain.adapter.CustomArrayAdapter;
+import br.com.trainning.pdv_2016.domain.model.Carrinho;
 import br.com.trainning.pdv_2016.domain.model.Item;
 import br.com.trainning.pdv_2016.domain.model.ItemProduto;
 import br.com.trainning.pdv_2016.domain.model.Produto;
@@ -51,13 +56,19 @@ public class MainActivity extends BaseActivity {
 
     private Callback<List<Produto>> callbackProdutos;
 
-    private AlertDialog dialog ;
+    private AlertDialog dialog;
 
-
+    private String idCompra;
+    private Carrinho carrinho;
 
 
     @Bind(R.id.listView)
     SwipeMenuListView listView;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +79,19 @@ public class MainActivity extends BaseActivity {
 
         configureProdutoCallback();
 
-        dialog = new SpotsDialog(this,"Baixando lista da Web...");
+        dialog = new SpotsDialog(this, "Baixando lista da Web...");
 
         List<Item> itens = Query.all(Item.class).get().asList();
-        for (Item item:itens){
+        for (Item item : itens) {
             item.delete();
         }
+        idCompra = Util.getUniquePsuedoID();
+        carrinho = new Carrinho();
+        carrinho.setId(0);
+        carrinho.setIdCompra(idCompra);
+        carrinho.setEncerrada(0);
+        carrinho.setEnviada(0);
+
 
         zxingLibConfig = new ZXingLibConfig();
         zxingLibConfig.useFrontLight = true;
@@ -82,7 +100,7 @@ public class MainActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    IntentIntegrator.initiateScan(MainActivity.this, zxingLibConfig);
+                IntentIntegrator.initiateScan(MainActivity.this, zxingLibConfig);
             }
         });
 
@@ -97,7 +115,7 @@ public class MainActivity extends BaseActivity {
                 openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
                         0xCE)));
                 // set item width
-                openItem.setWidth(Util.convertPixelsToDp(590.0f,MainActivity.this));
+                openItem.setWidth(Util.convertPixelsToDp(590.0f, MainActivity.this));
                 // set item title
 
                 openItem.setIcon(R.drawable.ic_exposure_plus_1_black_36dp);
@@ -111,7 +129,7 @@ public class MainActivity extends BaseActivity {
                 deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
                         0x3F, 0x25)));
                 // set item width
-                deleteItem.setWidth(Util.convertPixelsToDp(590.0f,MainActivity.this));
+                deleteItem.setWidth(Util.convertPixelsToDp(590.0f, MainActivity.this));
                 // set a icon
                 deleteItem.setIcon(R.drawable.ic_remove_shopping_cart_white_36dp);
                 // add to menu
@@ -127,11 +145,11 @@ public class MainActivity extends BaseActivity {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 ItemProduto itemProduto = adapter.getItem(position);
-                Item item = Query.one(Item.class,"select * from item where id = ?", itemProduto.getIdItem()).get();
+                Item item = Query.one(Item.class, "select * from item where id = ?", itemProduto.getIdItem()).get();
                 switch (index) {
                     case 0:
                         //Toast.makeText(getApplicationContext(), "Action 1 for " + itemProduto.getDescricao(), Toast.LENGTH_SHORT).show();
-                        item.setQuantidade(item.getQuantidade()+1);
+                        item.setQuantidade(item.getQuantidade() + 1);
                         item.save();
                         list.clear();
                         popularLista();
@@ -151,21 +169,24 @@ public class MainActivity extends BaseActivity {
 
         popularLista();
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         List<Produto> produtos = Query.all(Produto.class).get().asList();
-        if(produtos!=null){
-            for(Produto p: produtos){
-                Log.d("Produto:","id------------->"+p.getId());
-                Log.d("Produto:","descricao------>"+p.getDescricao());
-                Log.d("Produto:","unidade-------->"+p.getUnidade());
-                Log.d("Produto:","codigo barras-->"+p.getCodigoBarras());
-                Log.d("Produto:","preco---------->"+p.getPreco());
-                Log.d("Produto:","foto----------->"+p.getFoto());
-                Log.d("Produto:","--------------------------------");
+        if (produtos != null) {
+            for (Produto p : produtos) {
+                Log.d("Produto:", "id------------->" + p.getId());
+                Log.d("Produto:", "descricao------>" + p.getDescricao());
+                Log.d("Produto:", "unidade-------->" + p.getUnidade());
+                Log.d("Produto:", "codigo barras-->" + p.getCodigoBarras());
+                Log.d("Produto:", "preco---------->" + p.getPreco());
+                Log.d("Produto:", "foto----------->" + p.getFoto());
+                Log.d("Produto:", "--------------------------------");
             }
         }
     }
@@ -187,15 +208,18 @@ public class MainActivity extends BaseActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_novo) {
 
-            Intent telaCadastroNovoIntent = new Intent(MainActivity.this,CadastroNovoActivity.class);
+            Intent telaCadastroNovoIntent = new Intent(MainActivity.this, CadastroNovoActivity.class);
             startActivity(telaCadastroNovoIntent);
 
-        }else if(id == R.id.action_edit){
-            Intent telaEditarIntent = new Intent(MainActivity.this,EditarProdutoActivity.class);
+        } else if (id == R.id.action_edit) {
+            Intent telaEditarIntent = new Intent(MainActivity.this, EditarProdutoActivity.class);
             startActivity(telaEditarIntent);
-        }else if(id == R.id.action_sincronia){
+        } else if (id == R.id.action_sincronia) {
             dialog.show();
             new APIClient().getRestService().getAllProdutos(callbackProdutos);
+        }else if(id == R.id.action_fecha_compra){
+
+
         }
 
 
@@ -217,28 +241,24 @@ public class MainActivity extends BaseActivity {
                 String result = scanResult.getContents();
                 if (result != null) {
 
-                        Log.d("SCANBARCODE","BarCode: "+result);
+                    Log.d("SCANBARCODE", "BarCode: " + result);
 
-                    Produto produto = Query.one(Produto.class,"select * from produto where codigo_barra = ?",result).get();
-                    if(produto!=null){
+                    Produto produto = Query.one(Produto.class, "select * from produto where codigo_barra = ?", result).get();
+                    if (produto != null) {
 
                         Item item = new Item();
                         item.setId(0L);
-                        item.setIdCompra(1L);
+                        item.setIdCompra(idCompra);
                         item.setIdProduto(produto.getCodigoBarras());
                         item.setQuantidade(1);
                         item.save();
                         popularLista();
 
 
-
-
-
-                    }else{
+                    } else {
 
                         Toast.makeText(MainActivity.this, "Produto não localizado !", Toast.LENGTH_SHORT).show();
                     }
-
 
 
                 }
@@ -249,22 +269,22 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    public void popularLista(){
+    public void popularLista() {
         List<Item> listaItem = Query.many(Item.class, "select * from item where id_compra = ? order by id", 1).get().asList();
 
-        Log.d("TAMANHOLISTA",""+ listaItem.size());
+        Log.d("TAMANHOLISTA", "" + listaItem.size());
 
         ItemProduto itemProduto;
         Produto produto;
         list = new ArrayList<>();
-        valorTotal=0.0d;
+        valorTotal = 0.0d;
         quantidadeItens = 0;
 
-        for(Item item:listaItem){
+        for (Item item : listaItem) {
 
-            produto = Query.one(Produto.class,"select * from produto where codigo_barra = ?", item.getIdProduto()).get();
+            produto = Query.one(Produto.class, "select * from produto where codigo_barra = ?", item.getIdProduto()).get();
             itemProduto = new ItemProduto();
-            itemProduto.setIdCompra(1);
+            itemProduto.setIdCompra(idCompra);
             itemProduto.setIdItem(item.getId());
             itemProduto.setUnidade(produto.getUnidade());
             itemProduto.setFoto(produto.getFoto());
@@ -272,10 +292,10 @@ public class MainActivity extends BaseActivity {
             itemProduto.setQuantidade(item.getQuantidade());
             itemProduto.setPreco(produto.getPreco());
             list.add(itemProduto);
-            valorTotal+=item.getQuantidade()*produto.getPreco();
+            valorTotal += item.getQuantidade() * produto.getPreco();
             quantidadeItens += item.getQuantidade();
         }
-        getSupportActionBar().setTitle("PDV "+ Util.getFormatedCurrency(String.valueOf(valorTotal)));
+        getSupportActionBar().setTitle("PDV " + Util.getFormatedCurrency(String.valueOf(valorTotal)));
         adapter = new CustomArrayAdapter(this, R.layout.list_item, list);
         listView.setAdapter(adapter);
     }
@@ -285,17 +305,17 @@ public class MainActivity extends BaseActivity {
 
         callbackProdutos = new Callback<List<Produto>>() {
 
-            @Override public void success(List<Produto> resultado, Response response) {
+            @Override
+            public void success(List<Produto> resultado, Response response) {
 
                 List<Produto> lp = Query.all(Produto.class).get().asList();
 
 
-
-                for(Produto p:lp){
+                for (Produto p : lp) {
                     p.delete();
                 }
 
-                for(Produto produto:resultado){
+                for (Produto produto : resultado) {
                     produto.setId(0L);
                     produto.save();
                 }
@@ -304,11 +324,51 @@ public class MainActivity extends BaseActivity {
             }
 
 
-            @Override public void failure(RetrofitError error) {
+            @Override
+            public void failure(RetrofitError error) {
                 dialog.dismiss();
-                Log.e("RETROFIT", "Error:"+error.getMessage());
+                Log.e("RETROFIT", "Error:" + error.getMessage());
             }
         };
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://br.com.trainning.pdv_2016.ui/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://br.com.trainning.pdv_2016.ui/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
 }

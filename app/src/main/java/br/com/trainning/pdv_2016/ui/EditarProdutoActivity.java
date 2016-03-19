@@ -237,19 +237,11 @@ public class EditarProdutoActivity extends BaseActivity implements ImageInputHel
     }
 
     private void configureEditarProdutoCallback() {
-
-
         callbackEditarProduto = new Callback<String>() {
-
             @Override public void success(String resultado, Response response) {
-
-
-
                 dialog.dismiss();
                 finish();
             }
-
-
             @Override public void failure(RetrofitError error) {
 
                 dialog.dismiss();
